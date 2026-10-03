@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>BuddyVerse — বন্ধুত্ব হোক, খেলতে খেলতে!</title>
+<meta name="description" content="BuddyVerse social gaming platform prototype">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#061b45;--panel:#0a2555;--panel2:#102f68;--blue:#159cff;
+  --cyan:#35c9ff;--purple:#8b45ff;--text:#f7fbff;--muted:#a9bddb;
+  --line:rgba(255,255,255,.10);--green:#2bd67b;--gold:#ffbe2e;
+}
+body{
+  font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  background:radial-gradient(circle at 50% 0%,#193f83 0,#071b45 42%,#020c24 100%);
+  color:var(--text);min-height:100vh;overflow-x:hidden
+}
+button,input{font:inherit}
+button{border:0;cursor:pointer}
+.app{max-width:480px;min-height:100vh;margin:auto;background:linear-gradient(180deg,#071e4b,#041534);position:relative;box-shadow:0 0 70px rgba(0,0,0,.35)}
+.topbar{height:68px;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:20;background:rgba(5,23,57,.92);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:9px;font-size:21px;font-weight:800}
+.logo{width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg,#19cfff,#954cff);display:grid;place-items:center;box-shadow:0 0 18px rgba(35,167,255,.4);font-size:20px}
+.brand span{background:linear-gradient(90deg,#fff,#22a9ff);-webkit-background-clip:text;color:transparent}
+.actions{display:flex;gap:8px}
+.iconbtn{width:38px;height:38px;border-radius:50%;background:#102f68;color:white;font-size:18px;position:relative}
+.badge{position:absolute;right:-1px;top:-2px;background:#ff365d;width:16px;height:16px;border-radius:50%;font-size:10px;display:grid;place-items:center}
+.screen{display:none;padding:12px 14px 92px;min-height:calc(100vh - 68px)}
+.screen.active{display:block}
+.stories{display:flex;gap:12px;overflow:auto;padding:3px 0 13px;scrollbar-width:none}
+.stories::-webkit-scrollbar{display:none}
+.story{min-width:58px;text-align:center;font-size:11px;color:var(--muted)}
+.storypic{width:54px;height:54px;border-radius:50%;padding:2px;background:linear-gradient(135deg,#15cfff,#9a42ff);margin:auto auto 5px}
+.storypic img,.avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+.addstory{display:grid;place-items:center;background:#0e326e;font-size:27px}
+.card{background:linear-gradient(145deg,rgba(15,48,101,.96),rgba(7,29,68,.96));border:1px solid var(--line);border-radius:20px;margin:10px 0;padding:14px;box-shadow:0 10px 30px rgba(0,0,0,.18)}
+.create{display:flex;gap:10px;align-items:center}
+.avatar{width:42px;height:42px;border-radius:50%;overflow:hidden;flex:none;background:#244b83}
+.fakeinput{flex:1;background:#061b45;border:1px solid var(--line);border-radius:25px;padding:11px 14px;color:#92a8c7}
+.posthead{display:flex;align-items:center;gap:10px}.postmeta{flex:1}.postmeta b{display:block}.postmeta small{color:var(--muted)}
+.postimg{width:100%;height:230px;object-fit:cover;border-radius:15px;margin-top:12px;background:linear-gradient(135deg,#164b91,#f4a261)}
+.posttext{margin-top:10px;line-height:1.55;color:#eaf3ff}
+.postactions{display:flex;justify-content:space-between;border-top:1px solid var(--line);margin-top:12px;padding-top:10px}
+.action{background:transparent;color:#c8d9ef;display:flex;gap:6px;align-items:center}
+.action.liked{color:#ff5477}
+.sectiontitle{font-size:22px;margin:7px 0 14px}
+.search{display:flex;align-items:center;gap:9px;background:#102f68;border:1px solid var(--line);padding:11px 14px;border-radius:18px;margin-bottom:12px}
+.search input{border:0;outline:0;background:transparent;color:white;width:100%}
+.chips{display:flex;gap:8px;overflow:auto;margin-bottom:12px}.chip{padding:7px 12px;border-radius:18px;background:#102f68;color:#cfe1f8;white-space:nowrap;font-size:12px}.chip.active{background:#149dff;color:white}
+.friend{display:flex;align-items:center;gap:11px;padding:12px 0;border-bottom:1px solid var(--line)}
+.friend:last-child{border-bottom:0}.friendinfo{flex:1}.friendinfo b{display:block}.friendinfo small{color:var(--muted)}
+.online{display:inline-block;width:8px;height:8px;background:#27d978;border-radius:50%;margin-right:5px}
+.primary{background:linear-gradient(90deg,#0f9fff,#147eff);color:white;border-radius:20px;padding:9px 15px;font-weight:700}
+.secondary{background:#17386f;color:#dcecff;border-radius:20px;padding:9px 14px}
+.games{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.game{border-radius:18px;padding:18px 12px;min-height:145px;background:linear-gradient(145deg,#123e82,#0a2556);border:1px solid var(--line);text-align:center}
+.game .emoji{font-size:42px;margin-bottom:7px}.game b{display:block}.game small{color:var(--muted)}
+.challenge{background:linear-gradient(145deg,#122f69,#081c46);border:1px solid var(--line);border-radius:20px;padding:17px}
+.progress{height:9px;background:#0a1737;border-radius:10px;overflow:hidden;margin:12px 0}.progress i{display:block;width:60%;height:100%;background:linear-gradient(90deg,#0da9ff,#874aff);border-radius:10px}
+.profileHero{background:linear-gradient(180deg,#153b7b,#092354);border-radius:22px;padding:20px;text-align:center;overflow:hidden}
+.profilepic{width:105px;height:105px;border-radius:50%;margin:0 auto 10px;padding:3px;background:linear-gradient(135deg,#20caff,#9146ff)}
+.profilepic div{width:100%;height:100%;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,#264f91,#081b44);font-size:42px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);margin-top:18px}.stats b{display:block;font-size:17px}.stats small{color:var(--muted);font-size:10px}
+.level{display:flex;justify-content:space-between;font-size:12px;color:#b9cce6;margin-top:16px}
+.badges{display:flex;justify-content:center;gap:12px;margin:14px 0}.badgebig{width:48px;height:48px;border-radius:15px;display:grid;place-items:center;background:linear-gradient(145deg,#ffbf32,#9e5b00);font-size:25px}
+.tabs{display:flex;gap:8px;margin-top:13px}.tab{flex:1;background:#0e2c62;color:#a9c0de;padding:9px;border-radius:12px}.tab.active{background:#159cff;color:white}
+.coins{font-size:42px;font-weight:900;margin:5px 0}.coin{color:#ffc02e}.shoprow{display:flex;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid var(--line)}.shoprow:last-child{border:0}.shopicon{width:42px;height:42px;border-radius:13px;background:#17386f;display:grid;place-items:center;font-size:21px}.shopinfo{flex:1}.shopinfo small{color:var(--muted)}
+.chat{display:flex;flex-direction:column;gap:10px;min-height:calc(100vh - 170px)}.bubble{max-width:78%;padding:10px 13px;border-radius:17px;background:#12376f;align-self:flex-start}.bubble.me{background:linear-gradient(135deg,#079fff,#176eff);align-self:flex-end}.composer{position:fixed;bottom:72px;left:50%;transform:translateX(-50%);max-width:480px;width:100%;padding:9px 14px;background:rgba(4,18,43,.96);display:flex;gap:8px;z-index:15}.composer input{flex:1;background:#0f2e63;border:1px solid var(--line);border-radius:25px;padding:11px;color:white;outline:none}
+.bottomnav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;height:72px;background:rgba(4,19,45,.97);border-top:1px solid var(--line);display:flex;justify-content:space-around;align-items:center;z-index:30;backdrop-filter:blur(14px)}
+.navitem{background:transparent;color:#8da6c9;font-size:10px;display:flex;flex-direction:column;align-items:center;gap:4px}.navitem span{font-size:20px}.navitem.active{color:#22a9ff}.plus{width:49px;height:49px;border-radius:50%;background:linear-gradient(135deg,#14b6ff,#1679ff);color:white;font-size:27px;box-shadow:0 7px 20px rgba(20,137,255,.35)}
+.toast{position:fixed;top:78px;left:50%;transform:translate(-50%,-20px);opacity:0;pointer-events:none;background:#14366d;padding:11px 17px;border-radius:25px;border:1px solid var(--line);z-index:60;transition:.25s}.toast.show{opacity:1;transform:translate(-50%,0)}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.68);display:none;align-items:flex-end;z-index:50}.modal.show{display:flex}.sheet{width:100%;max-width:480px;margin:auto;background:#092250;border-radius:25px 25px 0 0;padding:20px;border-top:1px solid var(--line)}.sheet textarea{width:100%;height:130px;background:#061b45;border:1px solid var(--line);border-radius:16px;padding:13px;color:white;resize:none;outline:none}.sheethead{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+@media(min-width:700px){.app{border-left:1px solid var(--line);border-right:1px solid var(--line)}}
+
+[hidden]{display:none!important}
+.authwrap{position:fixed;inset:0;overflow:auto;z-index:50;padding:20px 14px;background:#061b45;display:grid;place-items:center}
+.acard{width:100%;max-width:420px;display:grid;gap:12px}
+.acard h1{font-size:24px}
+.fl{display:grid;gap:4px;font-size:13px;color:var(--muted)}
+.fl input,.fl select{background:#061b45;border:1px solid var(--line);border-radius:12px;padding:11px 13px;color:var(--text);width:100%;color-scheme:dark}
+.err{color:#ff7a8e;min-height:18px;font-size:13px}
+.lnk{background:none;color:var(--cyan);font-weight:700}
+.cm{display:grid;gap:8px;margin-top:10px}
+.cmt{background:#061b45;border-radius:14px;padding:7px 12px;font-size:14px;overflow-wrap:anywhere}
+.cmrow{display:flex;gap:8px}
+.cmrow input{flex:1;min-width:0;background:#061b45;border:1px solid var(--line);border-radius:20px;padding:9px 13px;color:var(--text)}
+.posttext{overflow-wrap:anywhere;white-space:pre-wrap}
+</style>
+</head>
+<body>
+<div class="app" id="app" hidden>
+  <header class="topbar">
+    <div class="brand"><div class="logo">🎮</div><span>BuddyVerse</span></div>
+    <div class="actions"><button class="iconbtn" onclick="showScreen('friends');document.getElementById('friendSearch').focus()">⌕</button><button class="iconbtn" onclick="showScreen('notifications')">🔔<i class="badge" id="bellb" style="display:none">0</i></button></div>
+  </header>
+
+  <main>
+    <section id="home" class="screen active">
+      <div class="stories"><div class="story" onclick="toast('Stories are coming soon')"><div class="storypic addstory">+</div>Add Story</div></div>
+      <div class="card create"><div class="avatar" id="myav" style="display:grid;place-items:center;font-weight:700;background:#159cff"></div><button class="fakeinput" onclick="openPost()">What's on your mind?</button></div>
+      <div id="feed"></div>
+    </section>
+
+    <section id="friends" class="screen">
+      <h2 class="sectiontitle">Friends</h2>
+      <div class="chips"><button class="chip active" data-c="all" onclick="setChip('all')">All</button><button class="chip" data-c="online" onclick="setChip('online')">🟢 Online</button><button class="chip" data-c="req" onclick="setChip('req')">Requests <b id="reqn">0</b></button></div>
+      <div class="search">🔍<input id="friendSearch" placeholder="Search people by name..." oninput="searchPeople()"></div>
+      <div class="card" id="friendList"></div>
+    </section>
+
+    <section id="games" class="screen">
+      <h2 class="sectiontitle">🎮 Mini Games</h2>
+      <div class="card" style="background:linear-gradient(100deg,#0e67bd,#7437d8);"><b style="font-size:18px">🎮 Play with Friends</b><br><small>Have Fun Together!</small></div>
+      <div class="games">
+        <button class="game" onclick="startGame('Ludo')"><div class="emoji">🎲</div><b>Ludo</b><small>1 vs 1 / 2 vs 2</small></button>
+        <button class="game" onclick="startGame('Chess')"><div class="emoji">♟️</div><b>Chess</b><small>1 vs 1</small></button>
+        <button class="game" onclick="startGame('Tic-Tac-Toe')"><div class="emoji">❌⭕</div><b>Tic-Tac-Toe</b><small>1 vs 1</small></button>
+        <button class="game" onclick="startGame('Quiz Battle')"><div class="emoji">🧠</div><b>Quiz Battle</b><small>1 vs 1</small></button>
+        <button class="game" onclick="startGame('Word Battle')"><div class="emoji">🔤</div><b>Word Battle</b><small>1 vs 1</small></button>
+        <button class="game" onclick="toast('More games coming soon')"><div class="emoji">🎮</div><b>More Games</b><small>Coming Soon</small></button>
+      </div>
+    </section>
+
+    <section id="profile" class="screen">
+      <div class="profileHero">
+        <div class="profilepic"><div id="pfav">?</div></div>
+        <h2 id="pfname"></h2><small id="pfhandle" style="color:#a9bddb"></small>
+        <p style="margin-top:9px;font-size:12px">Dream Big | Play Hard | Make Friends ❤️</p>
+        <div class="level"><span id="pflv">Lv. 1</span><span id="pfxp">0 / 500 XP</span></div><div class="progress"><i id="pfbar" style="width:0%"></i></div>
+        <div class="stats"><div><b id="stF">0</b><small>Friends</small></div><div><b id="stP">0</b><small>Posts</small></div><div><b id="stW">0</b><small>Games Won</small></div><div><b id="stC">0</b><small>Coins</small></div></div>
+      </div>
+      <div class="card"><h3>🏆 Badges</h3><div class="badges" style="opacity:.35"><div class="badgebig">🏅</div><div class="badgebig">⭐</div><div class="badgebig">💎</div><div class="badgebig">👑</div></div><small style="color:#a9bddb">Win games and finish challenges to unlock badges.</small></div>
+      <div style="display:flex;gap:8px;margin:10px 0"><button class="secondary" style="flex:1" onclick="showScreen('challenge')">🏆 Challenge</button><button class="secondary" style="flex:1" onclick="showScreen('coins')">🪙 Coins</button></div>
+      <h3 style="margin:14px 0 4px">My posts</h3><div id="myposts"></div>
+      <button class="secondary" style="width:100%;margin-top:12px" data-out>Log out</button>
+    </section>
+
+    <section id="challenge" class="screen">
+      <h2 class="sectiontitle">🏆 Daily Challenge</h2>
+      <div class="challenge"><b>Complete the challenge & earn XP + Coins!</b><div style="display:flex;justify-content:space-between;margin-top:16px;color:#a9bddb"><span>1</span><span>2</span><b style="color:#22a9ff">3</b><span>4</span><span>5</span><span>6</span><span>7</span></div><hr style="border-color:var(--line);margin:12px 0"><h3>🎨 Drawing Challenge</h3><p style="color:#a9bddb;margin:7px 0">Draw your dream place within 1 hour.</p><b style="color:#22a9ff">+50 XP</b> &nbsp; <b style="color:#ffc02e">🪙 +20</b><button class="primary" style="display:block;width:100%;margin-top:15px" onclick="toast('Challenge joined!')">Join Now</button></div>
+      <div class="card"><h3>Leaderboard</h3><div id="lb"></div></div>
+    </section>
+
+    <section id="coins" class="screen">
+      <h2 class="sectiontitle">🪙 My Coins</h2>
+      <div class="card"><div class="coins"><span class="coin">🪙</span> <span id="coinbal">0</span></div><small style="color:#a9bddb">Current Balance</small><div style="display:flex;gap:8px;margin-top:15px"><button class="primary" style="flex:1" onclick="toast('Win games and finish challenges to earn coins')">Earn Coins</button><button class="secondary" style="flex:1" onclick="toast('Buying coins is coming soon')">Buy Coins</button></div></div>
+      <div class="card"><h3>Use Coins For</h3><div class="shoprow"><div class="shopicon">✨</div><div class="shopinfo"><b>Profile Decoration</b><small>50–500 coins</small></div>›</div><div class="shoprow"><div class="shopicon">🎁</div><div class="shopinfo"><b>Virtual Gift</b><small>100–1000 coins</small></div>›</div><div class="shoprow"><div class="shopicon">🏆</div><div class="shopinfo"><b>Special Badges</b><small>200–1000 coins</small></div>›</div><div class="shoprow"><div class="shopicon">🎮</div><div class="shopinfo"><b>Game Items</b><small>50–500 coins</small></div>›</div></div>
+      <div class="card" style="border-color:#e2a900;background:linear-gradient(145deg,#2b2451,#102a61)"><h3>👑 Upgrade to Premium</h3><p style="color:#a9bddb;margin:6px 0">More coins, special badges and extra features.</p><button class="primary" onclick="toast('Premium is coming soon')">Explore Premium</button></div>
+    </section>
+
+    <section id="notifications" class="screen">
+      <h2 class="sectiontitle">Notifications</h2>
+      <div class="card" id="notes"></div>
+    </section>
+
+    <section id="chat" class="screen">
+      <h2 class="sectiontitle">💬 <span id="chatName">Riya Islam</span></h2>
+      <div class="chat" id="chatBox"></div>
+    </section>
+  </main>
+
+  <nav class="bottomnav">
+    <button class="navitem active" data-screen="home" onclick="showScreen('home')"><span>⌂</span>Home</button>
+    <button class="navitem" data-screen="friends" onclick="showScreen('friends')"><span>♟</span>Friends</button>
+    <button class="plus" onclick="openPost()">＋</button>
+    <button class="navitem" data-screen="games" onclick="showScreen('games')"><span>🎮</span>Games</button>
+    <button class="navitem" data-screen="profile" onclick="showScreen('profile')"><span>◉</span>Profile</button>
+  </nav>
+</div>
+
+<div class="composer" id="chatComposer" style="display:none"><input id="chatInput" placeholder="Type a message..." onkeydown="if(event.key==='Enter')sendMessage()"><button class="primary" onclick="sendMessage()">➤</button></div>
+<div class="authwrap" id="auth" hidden></div>
+<div class="toast" id="toast"></div>
+
+<div class="modal" id="postModal" onclick="if(event.target===this)closePost()">
+  <div class="sheet"><div class="sheethead"><h3>Create Post</h3><button class="iconbtn" onclick="closePost()">✕</button></div><textarea id="postText" placeholder="What's on your mind?"></textarea><div style="display:flex;gap:8px;margin-top:12px"><button class="secondary" onclick="toast('Photos are coming soon')">📷 Photo</button><button class="secondary" onclick="toast('Videos are coming soon')">🎥 Video</button><button class="primary" style="margin-left:auto" onclick="publishPost()">Post</button></div></div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script>
+const $=id=>document.getElementById(id);
+const esc=s=>{const d=document.createElement('div');d.textContent=s==null?'':String(s);return d.innerHTML};
+const FB_OK=typeof firebase!=='undefined';
+let auth,db,me=null,mode='reg',chip='all',PR={},FRS={},posts=[],mine=[],CUR=null,OPEN={},U={},hb=null,regBusy=false,entering=null,sT;
+if(FB_OK){
+  firebase.initializeApp({apiKey:"AIzaSyBXhQVp0WYJkwT8KkHPmUFjSY34b9VMAFs",authDomain:"buddyverse-f7fa6.firebaseapp.com",projectId:"buddyverse-f7fa6",storageBucket:"buddyverse-f7fa6.firebasestorage.app",messagingSenderId:"598956732569",appId:"1:598956732569:web:6bd9eb58a6f48e67dd0808"});
+  auth=firebase.auth();db=firebase.firestore();
+}
+const FV=()=>firebase.firestore.FieldValue;
+const screens=[...document.querySelectorAll('.screen')];
+function toast(msg){const t=$('toast');t.textContent=msg;t.classList.add('show');clearTimeout(window.__toast);window.__toast=setTimeout(()=>t.classList.remove('show'),1800)}
+function showScreen(id){
+  screens.forEach(s=>s.classList.toggle('active',s.id===id));
+  document.querySelectorAll('.navitem').forEach(n=>n.classList.toggle('active',n.dataset.screen===id));
+  $('chatComposer').style.display=id==='chat'?'flex':'none';
+  if(id!=='chat'&&U.msg){U.msg();U.msg=null;CUR=null}
+  if(me){
+    if(id==='friends'){$('friendSearch').value='';refreshFriends()}
+    if(id==='profile')loadMine();
+    if(id==='challenge')loadLB();
+    if(id==='notifications')renderNotes();
+  }
+  window.scrollTo({top:0});
+}
+function avh(name){const n=name||'?';let h=0;for(const c of n)h=(h*31+c.charCodeAt(0))%360;return `<div class="avatar" style="display:grid;place-items:center;font-weight:700;background:hsl(${h},55%,42%)">${esc(n[0].toUpperCase())}</div>`}
+function ago(t){const s=t&&t.toDate?(Date.now()-t.toDate().getTime())/1000:0;if(s<60)return 'Just now';if(s<3600)return Math.floor(s/60)+'m ago';if(s<86400)return Math.floor(s/3600)+'h ago';return Math.floor(s/86400)+'d ago'}
+function need(uid){
+  if(!uid||PR[uid]!==undefined)return;PR[uid]=null;
+  db.doc('profiles/'+uid).get().then(d=>{PR[uid]=d.exists?d.data():{name:'User'};paintPosts();if($('friends').classList.contains('active'))renderFriends();renderNotes()}).catch(()=>{PR[uid]={name:'User'}});
+}
+/* ---------- auth ---------- */
+const fld=(id,l,t,x)=>`<label class="fl"><span>${l}</span><input id="${id}" type="${t}" ${x||''}></label>`;
+function showAuth(){
+  const r=mode==='reg',y=new Date().getFullYear();
+  $('auth').hidden=false;$('app').hidden=true;
+  $('auth').innerHTML=`<div class="card acard"><div class="brand"><div class="logo">🎮</div><span>BuddyVerse</span></div><h1>${r?'Create your account':'Log in'}</h1>`
+  +(r?fld('f_n','Full name','text','autocomplete="name"')+fld('f_e','Email','email','autocomplete="email"')+fld('f_m','Mobile number','tel','inputmode="tel"')
+  +`<label class="fl"><span>Gender</span><select id="f_g"><option value="">Select</option><option>Male</option><option>Female</option><option>Other</option></select></label>`
+  +fld('f_y','Birth year','number',`inputmode="numeric" min="1920" max="${y}" placeholder="e.g. 2000"`)+fld('f_p','Password','password','autocomplete="new-password"')
+  :fld('f_e','Email','email','autocomplete="email"')+fld('f_p','Password','password','autocomplete="current-password"'))
+  +`<p class="err" id="err" role="alert"></p><button class="primary" id="sub">${r?'Create account':'Log in'}</button>`
+  +`<p style="text-align:center;color:var(--muted);font-size:14px">${r?'Already have an account? <button class="lnk" data-mode="login">Log in</button>':'New here? <button class="lnk" data-mode="reg">Create account</button>'}</p></div>`;
+}
+const bad=m=>{const e=$('err');if(e)e.textContent=m};
+function fbErr(e){
+  const c=(e&&e.code)||'';
+  if(c==='auth/email-already-in-use')return 'This email is already registered. Log in instead.';
+  if(/invalid-credential|wrong-password|user-not-found|invalid-login/.test(c))return 'Wrong email or password.';
+  if(c==='auth/weak-password')return 'Password must be at least 6 characters.';
+  if(c==='auth/network-request-failed')return 'Network problem. Check your internet.';
+  if(c==='auth/too-many-requests')return 'Too many tries. Please wait a bit.';
+  if(c==='permission-denied')return 'Server rules are not set up yet.';
+  return 'Something went wrong. Please try again.';
+}
+function submit(){
+  const g=i=>{const e=$(i);return e?e.value.trim():''};
+  const em=g('f_e').toLowerCase(),pw=$('f_p').value,y=new Date().getFullYear();
+  if(!FB_OK)return bad('Cannot reach the server. Check your internet and reload.');
+  if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em))return bad('Enter a valid email address.');
+  if(mode==='reg'){
+    const nm=g('f_n'),mb=g('f_m').replace(/[^0-9+]/g,''),gd=g('f_g'),yr=+g('f_y');
+    if(nm.length<2)return bad('Enter your full name.');
+    if(mb.replace('+','').length<10||mb.length>15)return bad('Enter a valid mobile number.');
+    if(!gd)return bad('Select your gender.');
+    if(!(yr>=1920&&yr<=y-13))return bad('Enter a valid birth year. You must be 13 or older.');
+    if(pw.length<6)return bad('Password must be at least 6 characters.');
+    bad('');regBusy=true;
+    auth.createUserWithEmailAndPassword(em,pw).then(c=>{
+      const uid=c.user.uid;
+      return c.user.updateProfile({displayName:nm}).catch(()=>{}).then(()=>Promise.all([
+        db.doc('users/'+uid).set({email:em,mobile:mb,gender:gd,year:yr,created:FV().serverTimestamp()}),
+        db.doc('profiles/'+uid).set({name:nm,nameLower:nm.toLowerCase(),xp:0,coins:100,wins:0,lastSeen:FV().serverTimestamp()})
+      ]));
+    }).then(()=>{regBusy=false;return loadMe(auth.currentUser)}).catch(e=>{regBusy=false;bad(fbErr(e))});
+  }else{bad('');auth.signInWithEmailAndPassword(em,pw).catch(e=>bad(fbErr(e)))}
+}
+function loadMe(u){
+  if(entering===u.uid||(me&&me.uid===u.uid))return Promise.resolve();
+  entering=u.uid;
+  return db.doc('profiles/'+u.uid).get().then(d=>{
+    let x=d.data();
+    if(!x){x={name:u.displayName||'User',nameLower:(u.displayName||'user').toLowerCase(),xp:0,coins:100,wins:0};db.doc('profiles/'+u.uid).set(x).catch(()=>{})}
+    try{localStorage.setItem('bv_seen','1')}catch(e){}
+    enter({uid:u.uid,email:u.email,...x});
+  }).catch(e=>{entering=null;console.error('loadMe',e&&e.stack||e);showAuth();bad('Could not load your profile. Please try again.')});
+}
+function enter(u){
+  Object.values(U).forEach(f=>typeof f==='function'&&f());U={};clearInterval(hb);
+  entering=null;me=u;PR[u.uid]=me;$('auth').hidden=true;$('app').hidden=false;
+  U.me=db.doc('profiles/'+u.uid).onSnapshot(d=>{const x=d.data();if(x&&me&&me.uid===u.uid){Object.assign(me,x);paintMe()}});
+  U.feed=db.collection('posts').orderBy('t','desc').limit(50).onSnapshot(sn=>{posts=sn.docs.map(d=>({id:d.id,...d.data({serverTimestamps:'estimate'})}));posts.forEach(p=>need(p.uid));paintPosts()},()=>toast('Cannot load posts'));
+  listenFriends();beat();hb=setInterval(beat,60000);paintMe();showScreen('home');
+}
+const beat=()=>{if(me)db.doc('profiles/'+me.uid).update({lastSeen:FV().serverTimestamp()}).catch(()=>{})};
+function logout(){Object.values(U).forEach(f=>typeof f==='function'&&f());U={};clearInterval(hb);me=null;entering=null;mode='login';posts=[];mine=[];FRS={};PR={};auth.signOut()}
+function paintMe(){
+  const xp=me.xp||0,lv=Math.floor(xp/500)+1,ini=(me.name||'?')[0].toUpperCase();
+  $('myav').textContent=ini;$('pfav').textContent=ini;$('pfname').textContent=me.name||'';
+  $('pfhandle').textContent='@'+((me.name||'').toLowerCase().replace(/[^a-z0-9]/g,'')||'user');
+  $('pflv').textContent='Lv. '+lv;$('pfxp').textContent=(xp%500)+' / 500 XP';$('pfbar').style.width=(xp%500)/5+'%';
+  $('stW').textContent=me.wins||0;$('stC').textContent=me.coins||0;$('coinbal').textContent=me.coins||0;
+}
+/* ---------- posts ---------- */
+function postHtml(p){
+  const L=p.likes||[],C=p.comments||[],k=L.includes(me.uid);
+  const cm=OPEN[p.id]?`<div class="cm">${C.map(c=>`<div class="cmt"><b>${esc(c.name)}</b> ${esc(c.text)}</div>`).join('')}<div class="cmrow"><input data-ci="${p.id}" placeholder="Write a comment..." aria-label="Write a comment"><button class="primary" data-cs="${p.id}">Send</button></div></div>`:'';
+  return `<article class="card"><div class="posthead">${avh(p.name)}<div class="postmeta"><b>${esc(p.name)}</b><small>${ago(p.t)} · 🌍</small></div></div><p class="posttext">${esc(p.text)}</p><small style="color:#a9bddb;display:block;margin-top:8px">❤️ ${L.length} &nbsp;&nbsp; ${C.length} comments</small><div class="postactions"><button class="action${k?' liked':''}" data-lk="${p.id}">❤️ Like</button><button class="action" data-cm="${p.id}">💬 Comment</button></div>${cm}</article>`;
+}
+function paintPosts(){
+  if(!me)return;
+  $('feed').innerHTML=posts.length?posts.map(postHtml).join(''):'<div class="card" style="text-align:center;color:#a9bddb">No posts yet. Tap ＋ to share the first one!</div>';
+  $('myposts').innerHTML=mine.map(postHtml).join('')||'<p style="color:#a9bddb">No posts yet.</p>';
+}
+function loadMine(){
+  db.collection('posts').where('uid','==',me.uid).get().then(sn=>{
+    mine=sn.docs.map(d=>({id:d.id,...d.data({serverTimestamps:'estimate'})})).sort((a,b)=>(b.t?b.t.seconds:0)-(a.t?a.t.seconds:0));
+    $('stP').textContent=mine.length;paintPosts();
+  }).catch(()=>{});
+}
+function openPost(){$('postModal').classList.add('show')}
+function closePost(){$('postModal').classList.remove('show')}
+function publishPost(){
+  const v=$('postText').value.trim();if(!v){toast('Write something first');return}
+  db.collection('posts').add({uid:me.uid,name:me.name,text:v.slice(0,1000),t:FV().serverTimestamp(),likes:[],comments:[]})
+    .then(()=>db.doc('profiles/'+me.uid).update({xp:FV().increment(10)})).catch(()=>toast('Could not post'));
+  closePost();$('postText').value='';showScreen('home');toast('Post published! 🎉 +10 XP');
+}
+const findPost=id=>posts.concat(mine).find(x=>x.id===id);
+function like(id){const p=findPost(id);if(!p)return;const has=(p.likes||[]).includes(me.uid);db.doc('posts/'+id).update({likes:has?FV().arrayRemove(me.uid):FV().arrayUnion(me.uid)}).then(()=>{if(mine.some(x=>x.id===id))loadMine()}).catch(()=>toast('Could not update'))}
+function addComment(id){const i=document.querySelector(`[data-ci="${id}"]`),v=i?i.value.trim():'';if(!v)return;db.doc('posts/'+id).update({comments:FV().arrayUnion({uid:me.uid,name:me.name,text:v.slice(0,300),t:Date.now()})}).then(()=>{if(mine.some(x=>x.id===id))loadMine()}).catch(()=>toast('Could not comment'))}
+/* ---------- friends ---------- */
+function listenFriends(){
+  let A={},B={};
+  const mk=()=>{FRS={...A,...B};Object.keys(FRS).forEach(need);const rq=Object.keys(FRS).filter(u=>FRS[u].st==='received').length,fr=Object.keys(FRS).filter(u=>FRS[u].st==='friends').length;
+    $('bellb').style.display=rq?'grid':'none';$('bellb').textContent=rq;$('reqn').textContent=rq;$('stF').textContent=fr;
+    if($('friends').classList.contains('active'))renderFriends();if($('notifications').classList.contains('active'))renderNotes()};
+  U.f1=db.collection('friendreq').where('from','==',me.uid).onSnapshot(sn=>{A={};sn.docs.forEach(d=>{const x=d.data();A[x.to]={id:d.id,st:x.status==='accepted'?'friends':'sent'}});mk()},()=>{});
+  U.f2=db.collection('friendreq').where('to','==',me.uid).onSnapshot(sn=>{B={};sn.docs.forEach(d=>{const x=d.data();B[x.from]={id:d.id,st:x.status==='accepted'?'friends':'received'}});mk()},()=>{});
+}
+const online=u=>{const t=PR[u]&&PR[u].lastSeen;return !!(t&&t.toMillis&&Date.now()-t.toMillis()<150000)};
+const row=(u,sub,btn)=>`<div class="friend">${avh((PR[u]||{}).name)}<div class="friendinfo"><b>${esc((PR[u]||{}).name||'...')}</b><small>${sub}</small></div>${btn}</div>`;
+const empty=t=>`<p style="color:#a9bddb;text-align:center;padding:10px">${t}</p>`;
+function setChip(c){chip=c;document.querySelectorAll('.chip').forEach(x=>x.classList.toggle('active',x.dataset.c===c));$('friendSearch').value='';refreshFriends()}
+function refreshFriends(){
+  const fr=Object.keys(FRS).filter(u=>FRS[u].st==='friends');
+  renderFriends();
+  Promise.all(fr.map(u=>db.doc('profiles/'+u).get().then(d=>{if(d.exists)PR[u]=d.data()}))).then(()=>{if($('friends').classList.contains('active'))renderFriends()}).catch(()=>{});
+}
+function renderFriends(){
+  if($('friendSearch').value.trim())return;
+  const ids=Object.keys(FRS),fr=ids.filter(u=>FRS[u].st==='friends'),rq=ids.filter(u=>FRS[u].st==='received');
+  let list;
+  if(chip==='req')list=rq.map(u=>row(u,'wants to be your friend',`<button class="primary" data-fr="accept" data-to="${u}">✓</button> <button class="secondary" data-fr="del" data-to="${u}">✕</button>`));
+  else list=(chip==='online'?fr.filter(online):fr).map(u=>row(u,online(u)?'<span class="online"></span>Online':'Offline',`<button class="secondary" data-chat="${u}">💬</button>`));
+  $('friendList').innerHTML=list.join('')||empty(chip==='req'?'No requests right now.':chip==='online'?'No friends online.':'No friends yet. Search for people above and add them!');
+}
+function searchPeople(){clearTimeout(sT);sT=setTimeout(doSearch,300)}
+function doSearch(){
+  const q=$('friendSearch').value.trim().toLowerCase();
+  if(!q){renderFriends();return}
+  db.collection('profiles').orderBy('nameLower').startAt(q).endAt(q+'\uf8ff').limit(20).get().then(sn=>{
+    if($('friendSearch').value.trim().toLowerCase()!==q)return;
+    const rows=sn.docs.filter(d=>d.id!==me.uid).map(d=>{
+      const u=d.id,f=FRS[u];PR[u]=d.data();
+      const btn=!f?`<button class="primary" data-fr="add" data-to="${u}">＋ Add</button>`:f.st==='sent'?`<button class="secondary" data-fr="del" data-to="${u}">Requested</button>`:f.st==='received'?`<button class="primary" data-fr="accept" data-to="${u}">Accept</button>`:`<button class="secondary" data-chat="${u}">💬</button>`;
+      return row(u,f&&f.st==='friends'?'Friend':'BuddyVerse player',btn);
+    });
+    $('friendList').innerHTML=rows.join('')||empty('No one found.');
+  }).catch(()=>{$('friendList').innerHTML=empty('Search failed.')});
+}
+function frAct(a,u){
+  const f=FRS[u];let pr;
+  if(a==='add')pr=db.doc('friendreq/'+me.uid+'_'+u).set({from:me.uid,to:u,status:'pending',t:FV().serverTimestamp()});
+  else if(f&&a==='accept')pr=db.doc('friendreq/'+f.id).update({status:'accepted'});
+  else if(f&&a==='del')pr=db.doc('friendreq/'+f.id).delete();
+  else return;
+  pr.then(()=>{if($('friendSearch').value.trim())doSearch()}).catch(()=>toast('Could not update'));
+}
+function renderNotes(){
+  if(!me)return;
+  const rq=Object.keys(FRS).filter(u=>FRS[u].st==='received');
+  $('notes').innerHTML=rq.map(u=>row(u,'sent you a friend request',`<button class="primary" data-fr="accept" data-to="${u}">✓</button>`)).join('')
+   +`<div class="friend"><div class="avatar" style="display:grid;place-items:center">🎮</div><div class="friendinfo"><b>Welcome to BuddyVerse!</b><small>Add friends and start playing</small></div></div>`;
+}
+function loadLB(){
+  db.collection('profiles').orderBy('xp','desc').limit(5).get().then(sn=>{
+    $('lb').innerHTML=sn.docs.map((d,i)=>{const x=d.data();return `<div class="friend"><div>${['🥇','🥈','🥉','4','5'][i]}</div><div class="friendinfo"><b>${esc(x.name)}</b></div><b>${x.xp||0} XP</b></div>`}).join('')||empty('No players yet.');
+  }).catch(()=>{});
+}
+/* ---------- chat ---------- */
+const cid=(a,b)=>a<b?a+'_'+b:b+'_'+a;
+function openChat(uid){
+  if(U.msg){U.msg();U.msg=null}
+  CUR={uid,id:cid(me.uid,uid)};$('chatName').textContent=(PR[uid]||{}).name||'Chat';$('chatBox').innerHTML='';showScreen('chat');
+  const id=CUR.id,ref=db.collection('chats').doc(id);
+  ref.set({members:[me.uid,uid]},{merge:true}).then(()=>{
+    if(!CUR||CUR.id!==id)return;
+    U.msg=ref.collection('msgs').orderBy('t').limitToLast(100).onSnapshot(sn=>{
+      $('chatBox').innerHTML=sn.docs.map(d=>{const m=d.data({serverTimestamps:'estimate'});return `<div class="bubble${m.from===me.uid?' me':''}">${esc(m.text)}</div>`}).join('')||empty('Say hi 👋');
+      window.scrollTo(0,document.body.scrollHeight);
+    },()=>{});
+  }).catch(()=>toast('Could not open chat'));
+}
+function sendMessage(){
+  const i=$('chatInput'),v=i.value.trim();if(!v||!CUR)return;i.value='';
+  const ref=db.collection('chats').doc(CUR.id);
+  ref.set({members:[me.uid,CUR.uid],last:v.slice(0,200),lastFrom:me.uid,lastT:FV().serverTimestamp()},{merge:true})
+    .then(()=>ref.collection('msgs').add({from:me.uid,text:v.slice(0,1000),t:FV().serverTimestamp()})).catch(()=>toast('Could not send'));
+}
+function startGame(game){toast(game+' is coming soon 🎮')}
+/* ---------- events & boot ---------- */
+document.addEventListener('click',e=>{
+  const t=e.target;let b;
+  if((b=t.closest('[data-lk]')))return like(b.dataset.lk);
+  if((b=t.closest('[data-cm]'))){OPEN[b.dataset.cm]=!OPEN[b.dataset.cm];paintPosts();const f=document.querySelector(`[data-ci="${b.dataset.cm}"]`);if(f)f.focus();return}
+  if((b=t.closest('[data-cs]')))return addComment(b.dataset.cs);
+  if((b=t.closest('[data-fr]')))return frAct(b.dataset.fr,b.dataset.to);
+  if((b=t.closest('[data-chat]')))return openChat(b.dataset.chat);
+  if((b=t.closest('[data-mode]'))){mode=b.dataset.mode;return showAuth()}
+  if(t.closest('#sub'))return submit();
+  if(t.closest('[data-out]'))return logout();
+});
+$('auth').addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.tagName==='INPUT')submit()});
+try{mode=localStorage.getItem('bv_seen')?'login':'reg'}catch(e){}
+if(!FB_OK){showAuth();bad('Cannot reach the server. Check your internet and reload.')}
+else auth.onAuthStateChanged(u=>{if(regBusy)return;if(u)loadMe(u);else{me=null;showAuth()}});
+
+</script>
+</body>
+</html>
